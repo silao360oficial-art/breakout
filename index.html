@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Encuesta Silao – Breakout Político</title>
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Anton&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:10px 0;min-height:100vh}
@@ -102,6 +102,11 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
   font-size:13px;font-weight:700;font-family:'Bangers',cursive;letter-spacing:2px;}
 #lbBtn:hover{box-shadow:0 0 14px rgba(255,214,0,.5);}
 
+#exitBtn{background:linear-gradient(135deg,#1a0a0a,#3a0d0d);border:1px solid #ef444466;
+  color:#ef4444;padding:9px 18px;border-radius:8px;cursor:pointer;
+  font-size:13px;font-weight:700;font-family:'Bangers',cursive;letter-spacing:2px;}
+#exitBtn:hover{box-shadow:0 0 14px rgba(239,68,68,.5);}
+
 /* ── MOBILE TOUCH HINT ── */
 #ctrl{font-size:11px;color:#444;margin-top:8px}
 
@@ -194,6 +199,10 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
   font-family:'Bangers',cursive;font-size:24px;letter-spacing:4px;cursor:pointer;
   text-shadow:0 0 10px #ffd60066;transition:all .2s;}
 #entry-btn:hover{background:#ffd600;color:#000;text-shadow:none;box-shadow:0 0 20px #ffd600;}
+#entry-exit{width:100%;padding:9px;margin-top:8px;border:1px solid #444;border-radius:10px;
+  background:transparent;color:#888;
+  font-family:'Bangers',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+#entry-exit:hover{border-color:#ef4444;color:#ef4444;}
 #entry-social{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
 #entry-social a{font-size:11px;padding:5px 10px;border-radius:6px;text-decoration:none;font-weight:700;}
 .es-web{background:#06B6D4;color:#000;}
@@ -278,6 +287,7 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
   <button id="startBtn">▶ INICIAR</button>
   <button id="pauseBtn">⏸ PAUSA</button>
   <button id="lbBtn">🏆 JUGADORES</button>
+  <button id="exitBtn">✕ SALIR</button>
 </div>
 <div id="ctrl">← → teclado · mouse · arrastra en móvil</div>
 
@@ -309,6 +319,7 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
       <button id="apodo-random" title="Apodo aleatorio">🎲</button>
     </div>
     <button id="entry-btn">▶ JUGAR</button>
+    <button id="entry-exit">✕ Salir</button>
     <div id="entry-social">
       <a href="https://silao360.com.mx" target="_blank" class="es-web">🌐 Web</a>
       <a href="https://silao360.com" target="_blank" class="es-app">📱 App</a>
@@ -485,7 +496,7 @@ function initBricks(){
   bricks=[];
   const total=BRK_ROWS*COLS;
   const GOOD_DROPS=['life','shield','wide'];
-  const BAD_DROPS=['lostlife','shrink','mini'];
+  const BAD_DROPS=['lostlife','shrink','shrink','mini'];
   const MID_DROPS=['triple','neon'];
   const allIdxs=[...Array(total).keys()].sort(()=>Math.random()-0.5);
   const dropMap={};
@@ -498,7 +509,7 @@ function initBricks(){
 
   const specialIdx=allIdxs[Math.floor(total*0.40)+1];
   // armored bricks: % increases with level
-  const armorChance=Math.min(0.4, 0.05*(level-1));
+  const armorChance=Math.min(0.55, 0.08+0.07*(level-1));
   // explosive bricks: 1 per level from level 2
   const explosiveCount=Math.min(level-1, 5);
   const explosiveSet=new Set(allIdxs.slice(Math.floor(total*0.42)+1, Math.floor(total*0.42)+1+explosiveCount));
@@ -513,7 +524,7 @@ function initBricks(){
       const isGood=dt?DROP_TYPES.find(x=>x.id===dt)?.good:null;
       // armored = needs 2-3 hits (harder per level)
       const isArmored=!isSpecial&&!isExplosive&&Math.random()<armorChance;
-      const hitMax=isSpecial?1:isExplosive?1:isArmored?(level>4?3:2):1;
+      const hitMax=isSpecial?1:isExplosive?1:isArmored?(level>2?3:2):1;
       bricks.push({
         x:20+c*(BRK_W+4),y:50+r*(BRK_H+5),
         w:BRK_W,h:BRK_H,
@@ -533,7 +544,7 @@ function initBricks(){
 
 function initBall(){
   // nivel 1 más lento; velocidad sube con nivel
-  const spd=3.2+level*0.5;
+  const spd=3.8+level*0.7;
   ball={x:W/2,y:H-110,vx:(Math.random()>0.5?1:-1)*spd*0.65,vy:-spd,r:9};
   balls=[ball];
 }
@@ -677,7 +688,7 @@ function applyDrop(type){
     flashMsg('▬ MEGA PALETA','#00ff88');
   }
   else if(type==='shrink'){
-    padMod=0.6;padModTimer=8000;
+    padMod=0.10;padModTimer=3000;
     vibrateTimer=10;
     flashMsg('↔ TABLITA!','#ff4400');
   }
@@ -716,6 +727,19 @@ function drawDrops(){
     ctx.fillStyle='#fff';ctx.font='bold 12px Bangers,sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(t.icon+' '+t.label,d.x,d.y+d.h/2);
+    // Badge numérico: muestra cuántas pelotas extra activa el drop
+    const badgeMap={'triple':'+2','mini':'+3','neon':'+6'};
+    const badgeNum=badgeMap[d.type];
+    if(badgeNum){
+      const br=9, bx2=d.x+d.w/2-br, by2=d.y-br;
+      ctx.beginPath();ctx.arc(bx2,by2,br,0,Math.PI*2);
+      ctx.fillStyle=d.type==='mini'?'#ff0066':d.type==='neon'?'#c026d3':'#ff5500';
+      ctx.fill();
+      ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 9px Arial,sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(badgeNum,bx2,by2);
+    }
     ctx.restore();
   });
 }
@@ -802,6 +826,17 @@ function drawBricks(){
         ctx.globalAlpha=1;
         ctx.fillStyle=dotColor;
         ctx.beginPath();ctx.arc(b.x+b.w-7,b.y+7,4,0,Math.PI*2);ctx.fill();
+      }
+      // badge de golpes requeridos en bloques que necesitan >1 hit
+      if(b.hits>1){
+        ctx.globalAlpha=1;
+        const bc=b.hits>=3?'#ff2200':b.hits===2?'#ff9900':'#ffd600';
+        ctx.fillStyle=bc;
+        ctx.beginPath();ctx.arc(b.x+8,b.y+b.h-7,7,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.fillStyle='#000';ctx.font='bold 9px Arial,sans-serif';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(String(b.hits),b.x+8,b.y+b.h-7+0.5);
       }
     }
     ctx.restore();
@@ -898,23 +933,53 @@ function drawPaddle(){
     ctx.beginPath();ctx.moveTo(0,py+ph+6);ctx.lineTo(W,py+ph+6);ctx.stroke();
   }
   const flash=Math.min(1,paddleFlash/120);
-  // flat metallic body — no shadowBlur
+  // flat metallic body
   const bodyG=ctx.createLinearGradient(px,py,px,py+ph);
   if(flash>0){
     bodyG.addColorStop(0,'#fff9c4');bodyG.addColorStop(0.5,'#ffd740');bodyG.addColorStop(1,'#fff9c4');
   } else {
-    bodyG.addColorStop(0,'#c8d8ff');bodyG.addColorStop(0.4,'#2255aa');bodyG.addColorStop(1,'#c8d8ff');
+    bodyG.addColorStop(0,'#1a1a2e');bodyG.addColorStop(0.4,'#0d0d1a');bodyG.addColorStop(1,'#1a1a2e');
   }
   ctx.fillStyle=bodyG;
   ctx.beginPath();ctx.roundRect(px,py,pw,ph,ph/2);ctx.fill();
+  // borde oscuro estilo KITT
+  ctx.strokeStyle=flash>0?'#ffd600':'#333355';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(px,py,pw,ph,ph/2);ctx.stroke();
   // top highlight
-  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.fillStyle='rgba(255,255,255,0.12)';
   ctx.beginPath();ctx.roundRect(px+4,py+2,pw-8,ph*0.32,ph/2);ctx.fill();
-  // center gem — flat circle, no radialGradient
+
+  // ── EFECTO KITT: escáner rojo que barre de lado a lado ──
+  if(!flash){
+    const t=Date.now()*0.001;
+    // posición del escáner: va de 0→1→0 en ciclo (~1.8s)
+    const cycle=(t%1.8)/1.8;
+    const pos=cycle<0.5?(cycle*2):(2-cycle*2); // ping-pong
+    const kx=px+8+(pw-16)*pos;
+    const ky=py+ph/2;
+    // estela (trail) antes del punto
+    const trailLen=pw*0.18;
+    const dir=cycle<0.5?1:-1;
+    const trailG=ctx.createLinearGradient(kx-dir*trailLen,ky,kx,ky);
+    trailG.addColorStop(0,'rgba(255,0,0,0)');
+    trailG.addColorStop(1,'rgba(255,30,0,0.45)');
+    ctx.fillStyle=trailG;
+    ctx.fillRect(kx-dir*trailLen,py+3,dir*trailLen,ph-6);
+    // punto principal — glow rojo brillante
+    ctx.shadowColor='#ff0000';ctx.shadowBlur=18;
+    ctx.fillStyle='#ff2200';
+    ctx.beginPath();ctx.arc(kx,ky,5,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+    // punto interior blanco para brillo
+    ctx.fillStyle='rgba(255,200,200,0.9)';
+    ctx.beginPath();ctx.arc(kx-1,ky-1,2,0,Math.PI*2);ctx.fill();
+  }
+
+  // center gem
   const gcx=px+pw/2, gcy=py+ph/2, gr=ph*0.36;
-  ctx.fillStyle=flash>0?'#ffd600':'#00aaff';
+  ctx.fillStyle=flash>0?'#ffd600':'rgba(0,100,255,0.3)';
   ctx.beginPath();ctx.arc(gcx,gcy,gr,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.fillStyle='rgba(255,255,255,0.5)';
   ctx.beginPath();ctx.arc(gcx-gr*0.28,gcy-gr*0.28,gr*0.22,0,Math.PI*2);ctx.fill();
   ctx.restore();
 }
@@ -1163,6 +1228,9 @@ document.getElementById('entry-btn').addEventListener('click',()=>{
 document.getElementById('apodo-input').addEventListener('keydown',e=>{
   if(e.key==='Enter') document.getElementById('entry-btn').click();
 });
+document.getElementById('entry-exit').addEventListener('click',()=>{
+  window.location.href='https://www.google.com';
+});
 
 // ── Game Over ─────────────────────────────────────────────────────────────
 async function showGameOver(){
@@ -1187,14 +1255,10 @@ document.getElementById('go-btn').addEventListener('click',()=>{
   });
 });
 document.getElementById('go-exit').addEventListener('click',()=>{
-  document.getElementById('go-overlay').classList.remove('show');
-  cancelAnimationFrame(raf);
-  reset(true);
-  state='idle';
-  msg.textContent='Presiona Iniciar';
-  startBtn.textContent='▶ INICIAR';
-  // show entry modal again to change apodo if desired
-  document.getElementById('entry-modal').style.display='flex';
+  window.location.href='https://www.google.com';
+});
+document.getElementById('exitBtn').addEventListener('click',()=>{
+  window.location.href='https://www.google.com';
 });
 
 // ── Leaderboard UI ───────────────────────────────────────────────────────
@@ -1242,6 +1306,11 @@ async function loadLeaderboardUI(){
 }
 
 // ── LÍDER (dibujado dentro del canvas, arriba de los ladrillos) ──────────
+let liderFontReady=false;
+if(document.fonts && document.fonts.load){
+  document.fonts.load("900 22px 'Anton'").then(()=>{liderFontReady=true;}).catch(()=>{liderFontReady=true;});
+  document.fonts.load("900 22px 'Bangers'").catch(()=>{});
+} else { liderFontReady=true; }
 const LIDER_COLORS=['#ffd600','#ff3333','#00e5ff','#c026d3','#22c55e','#f97316','#ffffff','#f472b6'];
 let liderText='⏳ Cargando líder...';
 async function loadLiderBar(){
@@ -1266,54 +1335,107 @@ async function loadLiderBar(){
 loadLiderBar();
 setInterval(loadLiderBar,30000);
 
-// Banner cómic del líder, dibujado en el canvas arriba de los ladrillos
-const LIDER_BANNER_Y=4, LIDER_BANNER_H=38;
+// Loop ligero independiente: mantiene el banner del líder visible y animado
+// en cualquier momento en que el loop principal del juego no esté corriendo
+// (pantalla de inicio, pausa, game over), para que nunca "desaparezca".
+function idleLiderLoop(){
+  if(state!=='playing'){
+    drawBG();
+    drawLiderBanner();
+    if(state==='idle'){drawBricks();drawPaddle();}
+  }
+  requestAnimationFrame(idleLiderLoop);
+}
+requestAnimationFrame(idleLiderLoop);
+
+// Banner de guerra — culebra + cómic paleta FUEGO (sin azul agua)
+const LIDER_BANNER_Y=3, LIDER_BANNER_H=38;
 function drawLiderBanner(){
   if(!liderText)return;
   ctx.save();
-  // marco tipo viñeta de cómic: fondo blanco, borde negro grueso, sombra dura
-  const bx=14, by=LIDER_BANNER_Y, bw=W-28, bh=LIDER_BANNER_H;
+  const bx=10, by=LIDER_BANNER_Y, bw=W-20, bh=LIDER_BANNER_H;
+
+  // Sombra dura estilo cómic de guerra
   ctx.fillStyle='#000';
-  ctx.fillRect(bx+4,by+4,bw,bh); // sombra dura estilo cómic
-  ctx.fillStyle='#fffceb';
+  ctx.fillRect(bx+5,by+5,bw,bh);
+
+  // Fondo negro con tinte rojo — bunker
+  const bg=ctx.createLinearGradient(bx,by,bx,by+bh);
+  bg.addColorStop(0,'#1a0500');
+  bg.addColorStop(0.5,'#0d0d0d');
+  bg.addColorStop(1,'#1a0000');
+  ctx.fillStyle=bg;
   ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.fill();
-  ctx.lineWidth=3.5;ctx.strokeStyle='#000';
+
+  // Borde naranja-rojo grueso cómic
+  ctx.lineWidth=4;ctx.strokeStyle='#ff6600';
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.stroke();
+  ctx.lineWidth=2;ctx.strokeStyle='#000';
   ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.stroke();
 
-  // texto animado letra por letra: efecto culebra + pulso
   const t=Date.now()*0.001;
-  ctx.font="bold 17px 'Bangers',cursive";
   ctx.textBaseline='middle';
   const cy=by+bh/2;
 
-  // trofeo fijo a la izquierda (no animado, evita problemas de stroke en emoji)
-  ctx.font='20px sans-serif';
+  // Estrella izquierda con rebote
+  const starBounce=Math.abs(Math.sin(t*4))*3;
+  const fontFamily=liderFontReady?"'Anton',sans-serif":"Arial Black,sans-serif";
+  ctx.font=`bold 16px ${fontFamily}`;
   ctx.textAlign='left';
-  ctx.fillText('🏆',bx+10,cy+1);
+  ctx.fillStyle='#ff3300';
+  ctx.shadowColor='#ff2200';ctx.shadowBlur=10;
+  ctx.fillText('★',bx+8,cy-starBounce);
+  ctx.shadowBlur=0;
 
-  ctx.font="bold 17px 'Bangers',cursive";
+  // Culebra + degradado fuego por letra — paleta GUERRA (rojo/naranja/oro, sin azul)
+  ctx.font=`900 22px ${fontFamily}`;
   const chars=[...liderText];
-  // medir ancho total para centrar
   let totalW=0;
-  const widths=chars.map(ch=>{const w=ctx.measureText(ch).width+1;totalW+=w;return w;});
-  let cx=bx+38+(bw-38)/2-totalW/2;
+  const widths=chars.map(ch=>{const w=ctx.measureText(ch).width+2;totalW+=w;return w;});
+  let cx2=bx+30+(bw-30)/2-totalW/2;
+
+  // Dos paletas de fuego — llama viva vs brasa
+  const firePals=[
+    ['#ffffff','#ffee00','#ff7700','#cc1100'],  // llama brillante
+    ['#ffee88','#ffbb00','#ff4400','#880000'],  // brasa profunda
+  ];
+
   chars.forEach((ch,i)=>{
     const w=widths[i];
     const phase=t*5-i*0.5;
-    const wave=Math.sin(phase)*4;           // culebra (sube/baja)
-    const pulse=1+0.18*Math.max(0,Math.sin(phase)); // pulso de escala
-    const col=LIDER_COLORS[i%LIDER_COLORS.length];
+    const wave=Math.sin(phase)*5;
+    const pulse=1+0.22*Math.max(0,Math.sin(phase));
     ctx.save();
-    ctx.translate(cx+w/2,cy+wave);
+    ctx.translate(cx2+w/2,cy+wave);
     ctx.scale(pulse,pulse);
     ctx.textAlign='center';
-    ctx.lineWidth=3;ctx.strokeStyle='#000';
+    ctx.font=`900 22px ${fontFamily}`;
+    const palIdx=Math.sin(phase)>0.3?0:1;
+    const pal=firePals[palIdx];
+    const grad=ctx.createLinearGradient(0,-12,0,12);
+    grad.addColorStop(0,pal[0]);
+    grad.addColorStop(0.3,pal[1]);
+    grad.addColorStop(0.65,pal[2]);
+    grad.addColorStop(1,pal[3]);
+    ctx.shadowColor=palIdx===0?'#ff6600':'#cc2200';
+    ctx.shadowBlur=14;
+    ctx.lineWidth=4;ctx.strokeStyle='#000';
     ctx.strokeText(ch,0,0);
-    ctx.fillStyle=col;
+    ctx.fillStyle=grad;
     ctx.fillText(ch,0,0);
+    ctx.shadowBlur=0;
     ctx.restore();
-    cx+=w;
+    cx2+=w;
   });
+
+  // Estrella derecha
+  ctx.font=`bold 16px ${fontFamily}`;
+  ctx.textAlign='right';
+  ctx.fillStyle='#ff3300';
+  ctx.shadowColor='#ff2200';ctx.shadowBlur=10;
+  ctx.fillText('★',bx+bw-8,cy-starBounce);
+  ctx.shadowBlur=0;
+
   ctx.restore();
 }
 
