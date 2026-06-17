@@ -29,7 +29,7 @@ body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direc
   content:'';position:absolute;inset:-3px;border-radius:11px;
   background:#060612;z-index:1;
 }
-#board-outer canvas{position:relative;z-index:2;display:block;}
+#board-outer canvas{position:relative;z-index:2;display:block;max-width:97vw;width:640px;height:auto;aspect-ratio:640/520;}
 @keyframes championRing{
   0%  {filter:hue-rotate(0deg)  brightness(1.2);}
   50% {filter:hue-rotate(180deg)brightness(1.6);}
@@ -44,6 +44,25 @@ body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direc
 .corner-ball.tr{top:-10px;right:-10px;animation-delay:calc(var(--ring-dur,3s)*-.25);}
 .corner-ball.bl{bottom:-10px;left:-10px;animation-delay:calc(var(--ring-dur,3s)*-.5);}
 .corner-ball.br{bottom:-10px;right:-10px;animation-delay:calc(var(--ring-dur,3s)*-.75);}
+
+/* ── SUGERENCIA DE ROTAR (no bloqueante) ── */
+#rotate-hint{
+  display:none;align-items:center;justify-content:center;gap:8px;
+  width:640px;max-width:97vw;margin-bottom:8px;padding:7px 14px;
+  background:linear-gradient(90deg,rgba(255,0,170,0.12),rgba(0,200,255,0.12));
+  border:1px solid rgba(0,229,255,0.35);border-radius:10px;
+  font-family:'Bangers',cursive;color:#aaffff;font-size:13px;letter-spacing:1px;
+  text-shadow:0 0 8px rgba(0,229,255,0.6);
+}
+#rotate-hint .rot-icon{font-size:18px;display:inline-block;animation:rotHint 1.6s ease-in-out infinite;}
+@keyframes rotHint{
+  0%,100%{transform:rotate(0deg);}
+  50%{transform:rotate(90deg);}
+}
+@media (orientation:portrait) and (max-width:768px){
+  #rotate-hint{display:flex;}
+}
+
 @keyframes orbitBall{
   0%  {transform:translate(0,0) scale(1);}
   25% {transform:translate(5px,-5px) scale(1.2);}
@@ -242,6 +261,13 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
 </head>
 <body>
 
+<!-- Sugerencia de rotar (solo aparece en vertical/mobile, no bloquea el juego) -->
+<div id="rotate-hint">
+  <span class="rot-icon">📱</span>
+  <span>GIRA TU TELÉFONO PARA MEJOR VISTA</span>
+  <span class="rot-icon">➜</span>
+</div>
+
 <!-- LOGO TOP -->
 <div id="logo-top">
   <img src="data:image/jpeg;base64,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" alt="logo">
@@ -411,13 +437,21 @@ const SUPABASE_URL='https://irekcyeoumxnwbtonfup.supabase.co';
 const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyZWtjeWVvdW14bndidG9uZnVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTczMzAsImV4cCI6MjA5NDc5MzMzMH0.gzmCwhJBeaabl83Q4W6cMhpk0Ofwg0OrHaYou9_ksL0';
 async function saveScore(nombre,puntos,nivel){
   try{
-    await fetch(`${SUPABASE_URL}/rest/v1/breakout_scores`,{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/breakout_scores`,{
       method:'POST',
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,
-                'Content-Type':'application/json','Prefer':'return=minimal','x-client-info':'breakout/1.0'},
+                'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({nombre,puntos,nivel,fecha:new Date().toISOString()})
     });
-  }catch(e){console.warn('Supabase error:',e);}
+    if(!r.ok){
+      const txt=await r.text();
+      console.error('saveScore HTTP '+r.status+':',txt);
+    } else {
+      console.log('Score guardado OK');
+    }
+  }catch(e){
+    console.error('saveScore fetch error:',e.message);
+  }
 }
 async function loadLeaderboard(){
   try{
@@ -1348,92 +1382,129 @@ function idleLiderLoop(){
 }
 requestAnimationFrame(idleLiderLoop);
 
-// Banner de guerra — culebra + cómic paleta FUEGO (sin azul agua)
+// Banner NEÓN premium — letrero de bar elegante, tubo real con flicker y reflejo
 const LIDER_BANNER_Y=3, LIDER_BANNER_H=38;
+let neonFlickerSeed=Math.random()*1000;
 function drawLiderBanner(){
   if(!liderText)return;
   ctx.save();
   const bx=10, by=LIDER_BANNER_Y, bw=W-20, bh=LIDER_BANNER_H;
-
-  // Sombra dura estilo cómic de guerra
-  ctx.fillStyle='#000';
-  ctx.fillRect(bx+5,by+5,bw,bh);
-
-  // Fondo negro con tinte rojo — bunker
-  const bg=ctx.createLinearGradient(bx,by,bx,by+bh);
-  bg.addColorStop(0,'#1a0500');
-  bg.addColorStop(0.5,'#0d0d0d');
-  bg.addColorStop(1,'#1a0000');
-  ctx.fillStyle=bg;
-  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.fill();
-
-  // Borde naranja-rojo grueso cómic
-  ctx.lineWidth=4;ctx.strokeStyle='#ff6600';
-  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.stroke();
-  ctx.lineWidth=2;ctx.strokeStyle='#000';
-  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.stroke();
-
   const t=Date.now()*0.001;
+
+  // Sombra dura
+  ctx.fillStyle='rgba(0,0,0,0.6)';
+  ctx.fillRect(bx+4,by+4,bw,bh);
+
+  // Fondo: vidrio negro profundo, como pared de bar de noche
+  const bg=ctx.createLinearGradient(bx,by,bx,by+bh);
+  bg.addColorStop(0,'#0a0a14');
+  bg.addColorStop(0.5,'#05050a');
+  bg.addColorStop(1,'#0a0a14');
+  ctx.fillStyle=bg;
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,10);ctx.fill();
+
+  // Resplandor ambiental magenta/cian filtrándose del marco (luz del neón sobre la pared)
+  const ambient=ctx.createLinearGradient(bx,by,bx+bw,by);
+  ambient.addColorStop(0,'rgba(255,0,170,0.10)');
+  ambient.addColorStop(0.5,'rgba(0,220,255,0.06)');
+  ambient.addColorStop(1,'rgba(255,0,170,0.10)');
+  ctx.fillStyle=ambient;
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,10);ctx.fill();
+
+  // Marco delgado tipo metal/cromo
+  ctx.lineWidth=1.5;ctx.strokeStyle='rgba(180,180,200,0.4)';
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,10);ctx.stroke();
+  ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,0,200,0.25)';
+  ctx.beginPath();ctx.roundRect(bx-1,by-1,bw+2,bh+2,11);ctx.stroke();
+
   ctx.textBaseline='middle';
   const cy=by+bh/2;
 
-  // Estrella izquierda con rebote
-  const starBounce=Math.abs(Math.sin(t*4))*3;
+  // Flicker sutil de neón real (parpadeo ocasional, no constante)
+  const flickerNoise=Math.sin(t*47+neonFlickerSeed)*Math.sin(t*13+neonFlickerSeed);
+  const flicker=flickerNoise>0.97?0.55:1;
+
+  // Estrella decorativa izquierda — pequeño tubo de neón cian
   const fontFamily=liderFontReady?"'Anton',sans-serif":"Arial Black,sans-serif";
-  ctx.font=`bold 16px ${fontFamily}`;
+  ctx.font=`16px ${fontFamily}`;
   ctx.textAlign='left';
-  ctx.fillStyle='#ff3300';
-  ctx.shadowColor='#ff2200';ctx.shadowBlur=10;
-  ctx.fillText('★',bx+8,cy-starBounce);
+  ctx.shadowColor='#00e5ff';ctx.shadowBlur=12*flicker;
+  ctx.fillStyle='#aaffff';
+  ctx.fillText('✦',bx+10,cy);
   ctx.shadowBlur=0;
 
-  // Culebra + degradado fuego por letra — paleta GUERRA (rojo/naranja/oro, sin azul)
-  ctx.font=`900 22px ${fontFamily}`;
-  const chars=[...liderText];
-  let totalW=0;
-  const widths=chars.map(ch=>{const w=ctx.measureText(ch).width+2;totalW+=w;return w;});
-  let cx2=bx+30+(bw-30)/2-totalW/2;
+  // Texto principal: tubo de neón — núcleo blanco, glow magenta/cian doble capa
+  // auto-ajuste de tamaño de fuente para que SIEMPRE quepa entre las estrellas
+  const maxTextW=bw-56;
+  let fontSize=22;
+  ctx.font=`900 ${fontSize}px ${fontFamily}`;
+  let fullText=liderText;
+  let textW=ctx.measureText(fullText).width;
+  while(textW>maxTextW && fontSize>10){
+    fontSize-=1;
+    ctx.font=`900 ${fontSize}px ${fontFamily}`;
+    textW=ctx.measureText(fullText).width;
+  }
+  // si aún no cabe al tamaño mínimo, trunca con "…"
+  if(textW>maxTextW){
+    while(fullText.length>3 && ctx.measureText(fullText+'…').width>maxTextW){
+      fullText=fullText.slice(0,-1);
+    }
+    fullText+='…';
+    textW=ctx.measureText(fullText).width;
+  }
+  const tx=bx+28+(bw-28)/2-textW/2;
+  const glowScale=fontSize/22; // glow proporcional al tamaño real
 
-  // Dos paletas de fuego — llama viva vs brasa
-  const firePals=[
-    ['#ffffff','#ffee00','#ff7700','#cc1100'],  // llama brillante
-    ['#ffee88','#ffbb00','#ff4400','#880000'],  // brasa profunda
-  ];
+  ctx.textAlign='left';
+  ctx.globalAlpha=flicker;
 
-  chars.forEach((ch,i)=>{
-    const w=widths[i];
-    const phase=t*5-i*0.5;
-    const wave=Math.sin(phase)*5;
-    const pulse=1+0.22*Math.max(0,Math.sin(phase));
-    ctx.save();
-    ctx.translate(cx2+w/2,cy+wave);
-    ctx.scale(pulse,pulse);
-    ctx.textAlign='center';
-    ctx.font=`900 22px ${fontFamily}`;
-    const palIdx=Math.sin(phase)>0.3?0:1;
-    const pal=firePals[palIdx];
-    const grad=ctx.createLinearGradient(0,-12,0,12);
-    grad.addColorStop(0,pal[0]);
-    grad.addColorStop(0.3,pal[1]);
-    grad.addColorStop(0.65,pal[2]);
-    grad.addColorStop(1,pal[3]);
-    ctx.shadowColor=palIdx===0?'#ff6600':'#cc2200';
-    ctx.shadowBlur=14;
-    ctx.lineWidth=4;ctx.strokeStyle='#000';
-    ctx.strokeText(ch,0,0);
-    ctx.fillStyle=grad;
-    ctx.fillText(ch,0,0);
-    ctx.shadowBlur=0;
-    ctx.restore();
-    cx2+=w;
-  });
+  // Capa de glow exterior ancho (magenta)
+  ctx.shadowColor='#ff00aa';
+  ctx.shadowBlur=16*glowScale;
+  ctx.fillStyle='rgba(255,0,170,0.5)';
+  ctx.fillText(fullText,tx,cy);
 
-  // Estrella derecha
-  ctx.font=`bold 16px ${fontFamily}`;
+  // Capa de glow medio (cian)
+  ctx.shadowColor='#00e5ff';
+  ctx.shadowBlur=9*glowScale;
+  ctx.fillStyle='rgba(0,229,255,0.65)';
+  ctx.fillText(fullText,tx,cy);
+
+  // Contorno fino oscuro para definición del tubo
+  ctx.shadowBlur=0;
+  ctx.lineWidth=1.2;
+  ctx.strokeStyle='rgba(60,0,40,0.5)';
+  ctx.strokeText(fullText,tx,cy);
+
+  // Núcleo brillante blanco-rosa — el "vidrio" del tubo encendido
+  ctx.shadowColor='#ffffff';
+  ctx.shadowBlur=5*glowScale;
+  const coreGrad=ctx.createLinearGradient(tx,cy-fontSize/2,tx,cy+fontSize/2);
+  coreGrad.addColorStop(0,'#ffffff');
+  coreGrad.addColorStop(0.5,'#ffd6f5');
+  coreGrad.addColorStop(1,'#ffffff');
+  ctx.fillStyle=coreGrad;
+  ctx.fillText(fullText,tx,cy);
+  ctx.shadowBlur=0;
+  ctx.globalAlpha=1;
+
+  // Reflejo tenue debajo del texto (como vidrio de bar pulido)
+  ctx.save();
+  ctx.scale(1,-1);
+  ctx.translate(0,-(2*cy+10));
+  ctx.globalAlpha=0.12*flicker;
+  ctx.fillStyle='#ff66cc';
+  ctx.fillText(fullText,tx,cy);
+  ctx.restore();
+  ctx.globalAlpha=1;
+
+  // Estrella derecha — tubo de neón cian
+  ctx.font=`16px ${fontFamily}`;
   ctx.textAlign='right';
-  ctx.fillStyle='#ff3300';
-  ctx.shadowColor='#ff2200';ctx.shadowBlur=10;
-  ctx.fillText('★',bx+bw-8,cy-starBounce);
+  ctx.shadowColor='#00e5ff';ctx.shadowBlur=12*flicker;
+  ctx.fillStyle='#aaffff';
+  ctx.fillText('✦',bx+bw-10,cy);
   ctx.shadowBlur=0;
 
   ctx.restore();
