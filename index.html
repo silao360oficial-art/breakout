@@ -59,9 +59,36 @@ body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direc
   0%,100%{transform:rotate(0deg);}
   50%{transform:rotate(90deg);}
 }
-@media (orientation:portrait) and (max-width:768px){
-  #rotate-hint{display:flex;}
+@media (orientation:landscape) and (max-width:1000px){
+  #logo-top, .soc-btn, #soc-row, #hud, #msg, #ctrl, #rotate-hint{display:none!important;}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+  #board-outer{
+    width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;
+  }
+  #board-outer canvas{
+    width:auto!important;height:96vh!important;max-width:98vw!important;max-height:96vh;
+    aspect-ratio:640/520;
+  }
+  .corner-ball{display:none;}
+  #btnWrap{
+    position:fixed;top:8px;right:8px;left:auto;bottom:auto;width:auto;
+    display:flex;flex-direction:column;gap:6px;z-index:50;
+    background:none;padding:0;margin:0;
+  }
+  #btnWrap button{display:none;}
+  #btnWrap #pauseBtn,#btnWrap #exitBtn{
+    display:block;width:42px;height:42px;padding:0;border-radius:50%;
+    font-size:16px;line-height:42px;text-align:center;
+  }
+  #fsBtn{display:flex!important;}
 }
+#fsBtn{
+  display:none;position:fixed;bottom:10px;right:10px;z-index:60;
+  width:42px;height:42px;border-radius:50%;align-items:center;justify-content:center;
+  background:rgba(10,10,20,0.75);border:1px solid rgba(0,229,255,0.4);
+  color:#aaffff;font-size:18px;cursor:pointer;backdrop-filter:blur(4px);
+}
+#fsBtn:hover{background:rgba(0,229,255,0.15);}
 
 @keyframes orbitBall{
   0%  {transform:translate(0,0) scale(1);}
@@ -316,6 +343,8 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
   <button id="exitBtn">✕ SALIR</button>
 </div>
 <div id="ctrl">← → teclado · mouse · arrastra en móvil</div>
+
+<button id="fsBtn" title="Pantalla completa">⛶</button>
 
 
 <!-- Leaderboard Modal -->
@@ -1295,6 +1324,22 @@ document.getElementById('exitBtn').addEventListener('click',()=>{
   window.location.href='https://www.google.com';
 });
 
+// ── Pantalla completa ──────────────────────────────────────────────────
+const fsBtn=document.getElementById('fsBtn');
+fsBtn.addEventListener('click',()=>{
+  const el=document.documentElement;
+  if(!document.fullscreenElement){
+    (el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen)?.call(el)
+      .catch(()=>{});
+    fsBtn.textContent='⛶';
+  } else {
+    (document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen)?.call(document);
+  }
+});
+document.addEventListener('fullscreenchange',()=>{
+  fsBtn.style.opacity=document.fullscreenElement?'0.55':'1';
+});
+
 // ── Leaderboard UI ───────────────────────────────────────────────────────
 const MEDALS=['🥇','🥈','🥉'];
 function fmtFecha(iso){
@@ -1377,6 +1422,7 @@ function idleLiderLoop(){
     drawBG();
     drawLiderBanner();
     if(state==='idle'){drawBricks();drawPaddle();}
+    drawLandscapeHUD();
   }
   requestAnimationFrame(idleLiderLoop);
 }
@@ -1530,8 +1576,30 @@ function loop(t){
   drawBG();
   drawLiderBanner();
   drawBricks();drawPaddle();drawBall();drawParticles();drawDrops();drawScreenFlash();
+  drawLandscapeHUD();
   if(lifeFlash!==0||trophyTimer>0) hud();
   raf=requestAnimationFrame(loop);
+}
+
+// HUD compacto dentro del canvas — solo visible cuando el HUD externo está oculto (landscape mobile)
+const isLandscapeMobile=()=>window.matchMedia('(orientation:landscape) and (max-width:1000px)').matches;
+function drawLandscapeHUD(){
+  if(!isLandscapeMobile())return;
+  ctx.save();
+  ctx.font="bold 13px 'Bangers',cursive";
+  ctx.textBaseline='top';
+  // franja translúcida abajo a la izquierda con score/vidas/nivel
+  const pad=6;
+  const txt=`SCORE ${score.toLocaleString()}   ❤×${Math.max(0,lives)}   LVL ${String(level).padStart(2,'0')}`;
+  const tw=ctx.measureText(txt).width;
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.beginPath();ctx.roundRect(pad,H-26,tw+16,20,6);ctx.fill();
+  ctx.fillStyle='#aaffff';
+  ctx.shadowColor='#00e5ff';ctx.shadowBlur=6;
+  ctx.textAlign='left';
+  ctx.fillText(txt,pad+8,H-23);
+  ctx.shadowBlur=0;
+  ctx.restore();
 }
 
 startBtn.addEventListener('click',()=>{
