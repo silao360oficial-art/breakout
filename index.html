@@ -7,19 +7,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Anton&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:10px 0;min-height:100vh}
+html,body{height:100%;overscroll-behavior:none;}
+body{
+  background:#060612;font-family:system-ui,sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:clamp(4px,1.6vh,10px) clamp(4px,2vw,10px);
+  min-height:100vh;min-height:100dvh;
+  overflow:hidden;
+  overscroll-behavior:none;
+  touch-action:none;
+}
+
+/* ── GAME CORE WRAPPER (hud + board + msg + controles) ── */
+#game-core{display:flex;flex-direction:column;align-items:center;width:100%;}
 
 /* ── HUD ── */
-#hud{display:flex;justify-content:space-between;align-items:center;width:640px;max-width:97vw;margin-bottom:6px;font-family:'Bangers',cursive;letter-spacing:2px;}
+#hud{display:flex;justify-content:space-between;align-items:center;width:var(--bw,640px);max-width:97vw;margin-bottom:6px;font-family:'Bangers',cursive;letter-spacing:2px;}
 #hud-left,#hud-right{display:flex;flex-direction:column;align-items:flex-start;gap:0px;}
 #hud-right{align-items:flex-end;}
-.hud-label{font-size:11px;color:#4488aa;letter-spacing:3px;}
-.hud-val{font-size:22px;color:#fff;text-shadow:0 0 10px #00d4ff,0 0 20px #00d4ff44;line-height:1;}
+.hud-label{font-size:clamp(9px,1.7vh,11px);color:#4488aa;letter-spacing:3px;white-space:nowrap;}
+.hud-val{font-size:clamp(16px,3.4vh,22px);color:#fff;text-shadow:0 0 10px #00d4ff,0 0 20px #00d4ff44;line-height:1;}
 #hud-center{display:flex;flex-direction:column;align-items:center;}
-#li{font-size:18px;letter-spacing:2px;filter:drop-shadow(0 0 6px #ff3366);}
+#li{font-size:clamp(13px,2.8vh,18px);letter-spacing:2px;filter:drop-shadow(0 0 6px #ff3366);white-space:nowrap;}
+
+/* ════════ LANDSCAPE: layout horizontal tipo app nativa ════════ */
+html.is-landscape body{
+  flex-direction:row;justify-content:center;align-items:center;
+  gap:clamp(6px,1.5vw,14px);
+}
+html.is-landscape #logo-top,
+html.is-landscape #social,
+html.is-landscape #msg,
+html.is-landscape #ctrl,
+html.is-landscape #rotate-hint{display:none!important;}
+html.is-landscape #game-core{
+  flex-direction:row;align-items:center;justify-content:center;
+  width:auto;gap:clamp(6px,1.6vw,16px);
+}
+html.is-landscape #hud{
+  flex-direction:column;justify-content:center;align-items:flex-start;
+  width:auto;max-width:none;height:var(--bh,520px);margin-bottom:0;
+  gap:clamp(8px,2.2vh,18px);order:1;
+}
+html.is-landscape #hud-left,
+html.is-landscape #hud-center,
+html.is-landscape #hud-right{align-items:flex-start;}
+html.is-landscape #board-outer{order:2;}
 
 /* ── BOARD WRAP with ring ── */
-#board-outer{position:relative;display:inline-block;}
+#board-outer{position:relative;display:inline-block;flex-shrink:0;}
 #board-outer::before{
   content:'';position:absolute;inset:-6px;border-radius:14px;
   background:conic-gradient(from 0deg,#ffd600,#ff4400,#c800ff,#0088ff,#00e5ff,#00ff88,#ffd600);
@@ -29,7 +65,7 @@ body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direc
   content:'';position:absolute;inset:-3px;border-radius:11px;
   background:#060612;z-index:1;
 }
-#board-outer canvas{position:relative;z-index:2;display:block;max-width:97vw;width:640px;height:auto;aspect-ratio:640/520;}
+#board-outer canvas{position:relative;z-index:2;display:block;width:var(--bw,640px);height:var(--bh,520px);}
 @keyframes championRing{
   0%  {filter:hue-rotate(0deg)  brightness(1.2);}
   50% {filter:hue-rotate(180deg)brightness(1.6);}
@@ -45,51 +81,6 @@ body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direc
 .corner-ball.bl{bottom:-10px;left:-10px;animation-delay:calc(var(--ring-dur,3s)*-.5);}
 .corner-ball.br{bottom:-10px;right:-10px;animation-delay:calc(var(--ring-dur,3s)*-.75);}
 
-/* ── SUGERENCIA DE ROTAR (no bloqueante) ── */
-#rotate-hint{
-  display:none;align-items:center;justify-content:center;gap:8px;
-  width:640px;max-width:97vw;margin-bottom:8px;padding:7px 14px;
-  background:linear-gradient(90deg,rgba(255,0,170,0.12),rgba(0,200,255,0.12));
-  border:1px solid rgba(0,229,255,0.35);border-radius:10px;
-  font-family:'Bangers',cursive;color:#aaffff;font-size:13px;letter-spacing:1px;
-  text-shadow:0 0 8px rgba(0,229,255,0.6);
-}
-#rotate-hint .rot-icon{font-size:18px;display:inline-block;animation:rotHint 1.6s ease-in-out infinite;}
-@keyframes rotHint{
-  0%,100%{transform:rotate(0deg);}
-  50%{transform:rotate(90deg);}
-}
-@media (orientation:landscape) and (max-width:1000px){
-  #logo-top, .soc-btn, #soc-row, #hud, #msg, #ctrl, #rotate-hint{display:none!important;}
-  body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}
-  #board-outer{
-    width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;
-  }
-  #board-outer canvas{
-    width:auto!important;height:96vh!important;max-width:98vw!important;max-height:96vh;
-    aspect-ratio:640/520;
-  }
-  .corner-ball{display:none;}
-  #btnWrap{
-    position:fixed;top:8px;right:8px;left:auto;bottom:auto;width:auto;
-    display:flex;flex-direction:column;gap:6px;z-index:50;
-    background:none;padding:0;margin:0;
-  }
-  #btnWrap button{display:none;}
-  #btnWrap #pauseBtn,#btnWrap #exitBtn{
-    display:block;width:42px;height:42px;padding:0;border-radius:50%;
-    font-size:16px;line-height:42px;text-align:center;
-  }
-  #fsBtn{display:flex!important;}
-}
-#fsBtn{
-  display:none;position:fixed;bottom:10px;right:10px;z-index:60;
-  width:42px;height:42px;border-radius:50%;align-items:center;justify-content:center;
-  background:rgba(10,10,20,0.75);border:1px solid rgba(0,229,255,0.4);
-  color:#aaffff;font-size:18px;cursor:pointer;backdrop-filter:blur(4px);
-}
-#fsBtn:hover{background:rgba(0,229,255,0.15);}
-
 @keyframes orbitBall{
   0%  {transform:translate(0,0) scale(1);}
   25% {transform:translate(5px,-5px) scale(1.2);}
@@ -100,10 +91,22 @@ body{background:#060612;font-family:system-ui,sans-serif;display:flex;flex-direc
 
 /* ── CONTROLS ── */
 #msg{margin-top:14px;font-family:'Bangers',cursive;font-size:18px;letter-spacing:2px;color:#06B6D4;min-height:22px;text-align:center;}
-#btnWrap{display:flex;gap:12px;margin-top:10px}
+#btnWrap{display:flex;gap:clamp(6px,1.5vw,12px);margin-top:10px;flex-wrap:wrap;justify-content:center;}
 button{padding:9px 26px;border:1px solid #ffd60066;border-radius:8px;background:#111827;color:#ffd600;cursor:pointer;font-size:13px;font-weight:700;font-family:'Bangers',cursive;letter-spacing:2px;}
 button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
 #ctrl{font-size:11px;color:#444;margin-top:8px}
+
+html.is-landscape #btnWrap{
+  flex-direction:column;margin-top:0;height:var(--bh,520px);
+  justify-content:center;gap:clamp(6px,2vh,12px);flex-wrap:nowrap;order:3;
+}
+html.is-landscape button{
+  padding:0;width:clamp(40px,7vh,52px);height:clamp(40px,7vh,52px);
+  border-radius:50%;font-size:clamp(16px,3vh,20px);
+  display:flex;align-items:center;justify-content:center;
+}
+html.is-landscape .btn-label{display:none;}
+html.is-landscape .btn-icon{display:block;line-height:1;}
 
 /* ── LEADERBOARD ── */
 /* ── LEADERBOARD MODAL ── */
@@ -113,6 +116,7 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
 #lb-inner{background:linear-gradient(135deg,#0a0f1e,#0d1a3a);
   border:2px solid transparent;border-radius:14px;padding:18px 16px;
   width:min(92vw,420px);max-height:80vh;overflow-y:auto;
+  touch-action:pan-y;
   background-clip:padding-box;position:relative;}
 @property --lb-a{syntax:'<angle>';inherits:false;initial-value:0deg;}
 @keyframes spinLb{to{--lb-a:360deg;}}
@@ -287,13 +291,7 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
 </style>
 </head>
 <body>
-
-<!-- Sugerencia de rotar (solo aparece en vertical/mobile, no bloquea el juego) -->
-<div id="rotate-hint">
-  <span class="rot-icon">📱</span>
-  <span>GIRA TU TELÉFONO PARA MEJOR VISTA</span>
-  <span class="rot-icon">➜</span>
-</div>
+<script>document.documentElement.classList.toggle('is-landscape', window.innerWidth>window.innerHeight);</script>
 
 <!-- LOGO TOP -->
 <div id="logo-top">
@@ -308,6 +306,7 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
   <a href="https://www.facebook.com/Encuestasilao/" target="_blank" class="soc-btn soc-fb">📘 Facebook</a>
 </div>
 
+<div id="game-core">
 <div id="hud">
   <div id="hud-left">
     <div class="hud-label">SCORE</div>
@@ -337,14 +336,13 @@ button:hover{background:#1e293b;box-shadow:0 0 12px rgba(255,214,0,.4);}
 
 <div id="msg">Presiona Iniciar</div>
 <div id="btnWrap">
-  <button id="startBtn">▶ INICIAR</button>
-  <button id="pauseBtn">⏸ PAUSA</button>
-  <button id="lbBtn">🏆 JUGADORES</button>
-  <button id="exitBtn">✕ SALIR</button>
+  <button id="startBtn"><span class="btn-icon">▶</span><span class="btn-label"> INICIAR</span></button>
+  <button id="pauseBtn"><span class="btn-icon">⏸</span><span class="btn-label"> PAUSA</span></button>
+  <button id="lbBtn"><span class="btn-icon">🏆</span><span class="btn-label"> JUGADORES</span></button>
+  <button id="exitBtn"><span class="btn-icon">✕</span><span class="btn-label"> SALIR</span></button>
 </div>
 <div id="ctrl">← → teclado · mouse · arrastra en móvil</div>
-
-<button id="fsBtn" title="Pantalla completa">⛶</button>
+</div>
 
 
 <!-- Leaderboard Modal -->
@@ -418,7 +416,20 @@ PARTIES.forEach(p=>{const im=new Image();im.src=p.img;IMGS[p.label]=im;});
 
 const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
-const W=640,H=520;
+// resolución lógica del juego — H se mantiene fija (zona de paddle/rebote
+// consistente); W es la que cambia para que en horizontal el tablero sea
+// un RECTÁNGULO ANCHO real (más espacio de juego, no solo escalado visual).
+let W=640,H=520;
+const DPR=Math.min(window.devicePixelRatio||1,2);
+
+// Ajusta el "lienzo físico" del canvas cada vez que W/H cambian
+function fitCanvasBackingStore(){
+  canvas.width=Math.round(W*DPR);
+  canvas.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+fitCanvasBackingStore();
+
 const sc=document.getElementById('sc');
 const lv=document.getElementById('lv');
 const li=document.getElementById('li');
@@ -426,10 +437,130 @@ const msg=document.getElementById('msg');
 const startBtn=document.getElementById('startBtn');
 const pauseBtn=document.getElementById('pauseBtn');
 
+// ════════════════════════════════════════════════════════════════════════
+// SISTEMA RESPONSIVE REAL — calcula el tamaño visual del tablero dinámicamente
+// según ancho/alto de pantalla y orientación. NUNCA usa tamaños fijos: mide
+// en vivo el espacio real disponible (incluyendo lo que ocupan HUD/botones)
+// y reparte el espacio como un "object-fit: contain" para el canvas.
+// ════════════════════════════════════════════════════════════════════════
+const hudEl=document.getElementById('hud');
+const btnWrapEl=document.getElementById('btnWrap');
+const logoTopEl=document.getElementById('logo-top');
+const socialEl=document.getElementById('social');
+const ctrlEl=document.getElementById('ctrl');
+
+function getViewport(){
+  const vv=window.visualViewport;
+  return vv?{w:vv.width,h:vv.height}:{w:window.innerWidth,h:window.innerHeight};
+}
+
+let layoutRAF=null;
+function scheduleLayout(){
+  if(layoutRAF!==null)return;
+  layoutRAF=requestAnimationFrame(()=>{layoutRAF=null;applyResponsiveLayout();});
+}
+
+// Mide cuánto espacio real le queda al tablero después de restar el HUD,
+// los botones y los márgenes — usado tanto para el tamaño visual (CSS)
+// como para decidir la proporción lógica del tablero (rectángulo).
+function measureAvailable(vw,vh,landscape){
+  let reservedW=0,reservedH=0;
+  const gap=Math.max(8,vw*0.015);
+  if(landscape){
+    const hudW=hudEl?hudEl.getBoundingClientRect().width:0;
+    const btnW=btnWrapEl?btnWrapEl.getBoundingClientRect().width:0;
+    reservedW=hudW+btnW+gap*2;
+    reservedH=gap*2;
+  }else{
+    const chrome=[logoTopEl,socialEl,hudEl,msg,btnWrapEl,ctrlEl].filter(el=>el&&el.offsetParent!==null);
+    reservedH=chrome.reduce((sum,el)=>sum+el.getBoundingClientRect().height,0)+chrome.length*8+gap*2;
+    reservedW=gap*2;
+  }
+  return {availW:Math.max(220,vw-reservedW),availH:Math.max(160,vh-reservedH)};
+}
+
+function applyResponsiveLayout(){
+  const {w:vw,h:vh}=getViewport();
+  const landscape=vw>vh;
+  const html=document.documentElement;
+  html.classList.toggle('is-landscape',landscape);
+  html.classList.toggle('is-portrait',!landscape);
+
+  // Medimos en vivo el espacio que ocupa el "chrome" alrededor del canvas.
+  // Esto se hace DESPUÉS de aplicar la clase de orientación para que el
+  // CSS ya haya reorganizado los elementos (hud/botones a los lados, etc).
+  const {availW,availH}=measureAvailable(vw,vh,landscape);
+
+  // Encajar manteniendo la proporción ACTUAL de W:H (que puede ser
+  // 640:520 en portrait o un rectángulo más ancho en landscape)
+  const aspect=W/H;
+  let bw=availW,bh=bw/aspect;
+  if(bh>availH){bh=availH;bw=bh*aspect;}
+
+  // Tope de seguridad relativo al viewport (nunca tamaños fijos en px)
+  const maxW=vw*(landscape?0.95:0.98);
+  if(bw>maxW){bw=maxW;bh=bw/aspect;}
+
+  document.documentElement.style.setProperty('--bw',bw+'px');
+  document.documentElement.style.setProperty('--bh',bh+'px');
+}
+
+window.addEventListener('resize',scheduleLayout);
+window.addEventListener('orientationchange',scheduleLayout);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',scheduleLayout);
+  window.visualViewport.addEventListener('scroll',scheduleLayout);
+}
+if(typeof ResizeObserver!=='undefined'){
+  new ResizeObserver(scheduleLayout).observe(document.body);
+}
+applyResponsiveLayout();
+
 const COLS=9,BRK_ROWS=5;
-const BRK_W=Math.floor((W-40)/COLS)-4;
-const BRK_H=38;
-const PAD_W=156,PAD_H=12,PAD_Y=H-32;
+let BRK_H=38;
+let BRK_W=Math.floor((W-40)/COLS)-4;
+let PAD_W=156,PAD_H=12,PAD_Y=H-32;
+
+// ── Recalcula la cuadrícula lógica del tablero según orientación real ──
+// Se llama SOLO en momentos seguros (inicio de partida, reinicio, subida
+// de nivel) para no "teletransportar" la pelota/paddle a mitad de un
+// rebote. En PORTRAIT se mantiene 640:520 (proporción clásica). En
+// LANDSCAPE, W crece para que el tablero sea un RECTÁNGULO ANCHO real
+// (más espacio de juego usado, bloques más anchos, no solo escalado), y
+// además los bloques se vuelven más ALTOS (mismas 5 filas) para llenar
+// el espacio vacío que antes quedaba entre los bloques y la pala.
+function computeBoardDims(){
+  const {w:vw,h:vh}=getViewport();
+  const landscape=vw>vh;
+  // H crece 20% en landscape: agranda bloques/paddle/pelota de forma
+  // proporcional (los márgenes fijos del tablero pesan menos sobre un H
+  // mayor). En portrait se mantiene 520 de siempre.
+  H=landscape?Math.round(520*1.2):520;
+  if(landscape){
+    // Usamos la proporción del espacio REAL disponible (ya medido igual
+    // que el motor visual) para que ancho Y alto se maximicen juntos —
+    // ninguno le roba espacio al otro. Tope de seguridad 1.35–2.3 para
+    // que el juego siga siendo jugable en pantallas extremas.
+    const {availW,availH}=measureAvailable(vw,vh,true);
+    let ratio=availW/availH;
+    ratio=Math.max(1.35,Math.min(ratio,2.3));
+    W=Math.round(H*ratio);
+  }else{
+    W=640;
+  }
+  if(landscape){
+    // Mismas 5 filas, pero más altas: llenan ~72% del alto del tablero
+    // en vez de quedarse en ~51%, eliminando el hueco negro de abajo.
+    BRK_H=Math.round((H*0.72-50)/BRK_ROWS-5);
+  }else{
+    BRK_H=38; // proporción clásica en vertical
+  }
+  BRK_W=Math.floor((W-40)/COLS)-4;
+  PAD_W=Math.round(156*(W/640));
+  PAD_Y=H-32;
+  fitCanvasBackingStore();
+  applyResponsiveLayout();
+}
 
 // ── Power-up drops — VERDE=bueno, AMARILLO=neutro, ROJO=trampa ──────────
 let comboHits=0;
@@ -620,6 +751,7 @@ function initPaddle(){
 function reset(hard){
   if(hard){score=0;lives=3;level=1;}
   drops.length=0;comboHits=0;shieldActive=0;paddleFlash=0;screenFlashes.length=0;trophyTimer=0;
+  computeBoardDims();
   initBricks();initBall();initPaddle();hud();
   balls=[ball];
 }
@@ -1238,7 +1370,7 @@ function update(dt){
       const cx=Math.random()*W,cy=Math.random()*(H*0.6);
       spawnParticles(cx,cy,colors[Math.floor(Math.random()*colors.length)]);
     }
-    level++;initBricks();initBall();balls=[ball];comboHits=0;comboMult=1;
+    level++;computeBoardDims();initBricks();initBall();initPaddle();balls=[ball];comboHits=0;comboMult=1;
     msg.textContent='🎉 ¡NIVEL '+level+'!';
     msg.style.color='#ffd600';msg.style.fontSize='18px';
     setTimeout(()=>{if(state==='playing'){msg.textContent='';msg.style.fontSize='';msg.style.color='#06B6D4';}},2000);
@@ -1313,7 +1445,7 @@ document.getElementById('go-btn').addEventListener('click',()=>{
   reset(true);
   startCountdown(()=>{
     state='playing';paused=false;
-    msg.textContent='';startBtn.textContent='▶ REINICIAR';
+    msg.textContent='';startBtn.querySelector('.btn-label').textContent=' REINICIAR';
     lastT=performance.now();raf=requestAnimationFrame(loop);
   });
 });
@@ -1322,22 +1454,6 @@ document.getElementById('go-exit').addEventListener('click',()=>{
 });
 document.getElementById('exitBtn').addEventListener('click',()=>{
   window.location.href='https://www.google.com';
-});
-
-// ── Pantalla completa ──────────────────────────────────────────────────
-const fsBtn=document.getElementById('fsBtn');
-fsBtn.addEventListener('click',()=>{
-  const el=document.documentElement;
-  if(!document.fullscreenElement){
-    (el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen)?.call(el)
-      .catch(()=>{});
-    fsBtn.textContent='⛶';
-  } else {
-    (document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen)?.call(document);
-  }
-});
-document.addEventListener('fullscreenchange',()=>{
-  fsBtn.style.opacity=document.fullscreenElement?'0.55':'1';
 });
 
 // ── Leaderboard UI ───────────────────────────────────────────────────────
@@ -1422,7 +1538,6 @@ function idleLiderLoop(){
     drawBG();
     drawLiderBanner();
     if(state==='idle'){drawBricks();drawPaddle();}
-    drawLandscapeHUD();
   }
   requestAnimationFrame(idleLiderLoop);
 }
@@ -1576,36 +1691,14 @@ function loop(t){
   drawBG();
   drawLiderBanner();
   drawBricks();drawPaddle();drawBall();drawParticles();drawDrops();drawScreenFlash();
-  drawLandscapeHUD();
   if(lifeFlash!==0||trophyTimer>0) hud();
   raf=requestAnimationFrame(loop);
-}
-
-// HUD compacto dentro del canvas — solo visible cuando el HUD externo está oculto (landscape mobile)
-const isLandscapeMobile=()=>window.matchMedia('(orientation:landscape) and (max-width:1000px)').matches;
-function drawLandscapeHUD(){
-  if(!isLandscapeMobile())return;
-  ctx.save();
-  ctx.font="bold 13px 'Bangers',cursive";
-  ctx.textBaseline='top';
-  // franja translúcida abajo a la izquierda con score/vidas/nivel
-  const pad=6;
-  const txt=`SCORE ${score.toLocaleString()}   ❤×${Math.max(0,lives)}   LVL ${String(level).padStart(2,'0')}`;
-  const tw=ctx.measureText(txt).width;
-  ctx.fillStyle='rgba(0,0,0,0.55)';
-  ctx.beginPath();ctx.roundRect(pad,H-26,tw+16,20,6);ctx.fill();
-  ctx.fillStyle='#aaffff';
-  ctx.shadowColor='#00e5ff';ctx.shadowBlur=6;
-  ctx.textAlign='left';
-  ctx.fillText(txt,pad+8,H-23);
-  ctx.shadowBlur=0;
-  ctx.restore();
 }
 
 startBtn.addEventListener('click',()=>{
   cancelAnimationFrame(raf);
   reset(state==='gameover'||state==='idle');
-  paused=false;msg.textContent='';startBtn.textContent='▶ REINICIAR';
+  paused=false;msg.textContent='';startBtn.querySelector('.btn-label').textContent=' REINICIAR';
   startCountdown(()=>{
     state='playing';
     lastT=performance.now();raf=requestAnimationFrame(loop);
@@ -1615,7 +1708,8 @@ startBtn.addEventListener('click',()=>{
 pauseBtn.addEventListener('click',()=>{
   if(state!=='playing')return;
   paused=!paused;
-  pauseBtn.textContent=paused?'▶ CONTINUAR':'⏸ PAUSA';
+  pauseBtn.querySelector('.btn-icon').textContent=paused?'▶':'⏸';
+  pauseBtn.querySelector('.btn-label').textContent=paused?' CONTINUAR':' PAUSA';
   if(!paused){lastT=performance.now();raf=requestAnimationFrame(loop);}
   else cancelAnimationFrame(raf);
 });
@@ -1623,19 +1717,27 @@ pauseBtn.addEventListener('click',()=>{
 document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
 
-// ── Touch controls (scale-aware drag, whole page) ──────────────────────
+// ── Touch controls (posición ABSOLUTA, en cualquier parte de la pantalla) ──
+// La pala se mueve directo a donde está el dedo, sin importar si tocas
+// sobre el tablero, el HUD, los botones o el espacio vacío alrededor.
+// Se usa el ancho COMPLETO de la pantalla (no solo el canvas) para que
+// "todo el celular/iPad" sirva como zona de control.
 let touchX=null;
 function getScaleX(){return W/canvas.getBoundingClientRect().width;}
 function clampPaddle(x){return Math.max(0,Math.min(W-paddle.w,x));}
+function touchToPaddleX(clientX){
+  const vw=window.visualViewport?window.visualViewport.width:window.innerWidth;
+  return (clientX/vw)*W-paddle.w/2;
+}
 document.addEventListener('touchstart',e=>{
   if(state!=='playing')return;
   touchX=e.touches[0].clientX;
+  paddle.x=clampPaddle(touchToPaddleX(touchX));
 },{passive:true});
 document.addEventListener('touchmove',e=>{
-  if(touchX===null||state!=='playing')return;
-  const dx=(e.touches[0].clientX-touchX)*getScaleX();
-  paddle.x=clampPaddle(paddle.x+dx);
+  if(state!=='playing')return;
   touchX=e.touches[0].clientX;
+  paddle.x=clampPaddle(touchToPaddleX(touchX));
   e.preventDefault();
 },{passive:false});
 document.addEventListener('touchend',()=>{touchX=null;});
