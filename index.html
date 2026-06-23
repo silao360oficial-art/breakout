@@ -32,8 +32,8 @@ body{
 
 /* ════════ LANDSCAPE: layout horizontal tipo app nativa ════════ */
 html.is-landscape body{
-  flex-direction:row;justify-content:center;align-items:center;
-  gap:clamp(6px,1.5vw,14px);
+  justify-content:center;
+  padding-left:clamp(14px,3.5vw,28px);padding-right:clamp(14px,3.5vw,28px);
 }
 html.is-landscape #logo-top,
 html.is-landscape #social,
@@ -53,6 +53,20 @@ html.is-landscape #hud-left,
 html.is-landscape #hud-center,
 html.is-landscape #hud-right{align-items:flex-start;}
 html.is-landscape #board-outer{order:2;}
+
+/* Barra superior compacta en landscape: logo + Web/App/Facebook en una
+   sola fila delgada, para no robarle mucha altura al tablero. */
+html.is-landscape #logo-top{
+  margin-bottom:2px;gap:5px;
+}
+html.is-landscape #logo-top img{width:18px;height:18px;}
+html.is-landscape #logo-top span{font-size:11px;letter-spacing:1.5px;}
+html.is-landscape #social{
+  margin-bottom:4px;gap:5px;
+}
+html.is-landscape .soc-btn{
+  padding:2px 7px;font-size:9px;gap:3px;border-radius:5px;
+}
 
 /* ── BOARD WRAP with ring ── */
 #board-outer{position:relative;display:inline-block;flex-shrink:0;}
@@ -116,7 +130,7 @@ html.is-landscape .btn-icon{display:block;line-height:1;}
 #lb-inner{background:linear-gradient(135deg,#0a0f1e,#0d1a3a);
   border:2px solid transparent;border-radius:14px;padding:18px 16px;
   width:min(92vw,420px);max-height:80vh;overflow-y:auto;
-  touch-action:pan-y;
+  touch-action:pan-y;overscroll-behavior:contain;
   background-clip:padding-box;position:relative;}
 @property --lb-a{syntax:'<angle>';inherits:false;initial-value:0deg;}
 @keyframes spinLb{to{--lb-a:360deg;}}
@@ -144,6 +158,31 @@ html.is-landscape .btn-icon{display:block;line-height:1;}
   animation:pulse-lb 1.2s ease-in-out infinite;padding:12px;}
 @keyframes pulse-lb{0%,100%{opacity:1;}50%{opacity:.4;}}
 /* old external lb hidden */
+
+/* ── MODAL "¿CÓMO SE JUEGA?" ── */
+#howto-modal{display:none;position:fixed;inset:0;z-index:998;background:rgba(0,0,0,.8);
+  justify-content:center;align-items:center;}
+#howto-modal.show{display:flex;}
+#howto-inner{background:linear-gradient(135deg,#0a0f1e,#0d1a3a);
+  border:2px solid transparent!important;
+  background:linear-gradient(rgba(10,15,30,0.97),rgba(10,15,30,0.97)) padding-box,
+    conic-gradient(from var(--lb-a),#ffd600,#ff4500,#00e5ff,#ffd600) border-box!important;
+  animation:spinLb 4s linear infinite!important;
+  border-radius:14px;padding:20px 18px;
+  width:min(94vw,480px);max-height:85vh;overflow-y:auto;
+  touch-action:pan-y;overscroll-behavior:contain;position:relative;}
+#howto-close{position:absolute;top:10px;right:14px;background:none;border:none;
+  color:#ffd600;font-size:24px;cursor:pointer;line-height:1;padding:0;z-index:2;}
+#howto-inner h3{font-family:'Bangers',cursive;font-size:24px;letter-spacing:3px;color:#ffd600;
+  text-align:center;margin-bottom:12px;text-shadow:0 0 12px rgba(255,214,0,.6);}
+#howto-inner h4{font-family:'Bangers',cursive;font-size:18px;letter-spacing:2px;
+  margin:14px 0 8px;}
+.howto-row{display:flex;align-items:flex-start;gap:10px;line-height:1.3;
+  color:#e2e8f0;padding:8px 8px;border-radius:8px;background:#ffffff08;margin-bottom:6px;}
+.howto-row .howto-icon{font-size:25px;flex-shrink:0;width:32px;text-align:center;}
+.howto-row .howto-label{font-size:16px;font-weight:800;display:block;}
+.howto-row .howto-desc{font-size:13px;color:#94a3b8;display:block;margin-top:1px;}
+.howto-basic .howto-label{font-size:16px;color:#c0d8ff;font-weight:800;}
 #leaderboard{display:none!important;}
 
 /* ── LEADERBOARD BTN in controls ── */
@@ -338,6 +377,7 @@ html.is-landscape .btn-icon{display:block;line-height:1;}
 <div id="btnWrap">
   <button id="startBtn"><span class="btn-icon">▶</span><span class="btn-label"> INICIAR</span></button>
   <button id="pauseBtn"><span class="btn-icon">⏸</span><span class="btn-label"> PAUSA</span></button>
+  <button id="helpBtn"><span class="btn-icon">❓</span><span class="btn-label"> CÓMO JUGAR</span></button>
   <button id="lbBtn"><span class="btn-icon">🏆</span><span class="btn-label"> JUGADORES</span></button>
   <button id="exitBtn"><span class="btn-icon">✕</span><span class="btn-label"> SALIR</span></button>
 </div>
@@ -357,6 +397,55 @@ html.is-landscape .btn-icon{display:block;line-height:1;}
       </a>
     </div>
     <div id="lb-loading">Cargando...</div>
+  </div>
+</div>
+
+<!-- Modal: ¿Cómo se juega? -->
+<div id="howto-modal">
+  <div id="howto-inner">
+    <button id="howto-close">✕</button>
+    <h3>❓ ¿CÓMO SE JUEGA?</h3>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">❤️</span>
+      <span><span class="howto-label">Vidas</span><span class="howto-desc">Cuántos intentos te quedan antes de Game Over</span></span>
+    </div>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">🔢</span>
+      <span><span class="howto-label">Número en el bloque</span><span class="howto-desc">Golpes que le faltan para romperse</span></span>
+    </div>
+    <h4 style="color:#06B6D4">🎯 ¿CÓMO GANO PUNTOS?</h4>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">🧱</span>
+      <span><span class="howto-label">Rompe bloques</span><span class="howto-desc">Cada bloque roto suma puntos — los blindados (con número) valen más</span></span>
+    </div>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">🔥</span>
+      <span><span class="howto-label">Combos</span><span class="howto-desc">Rompe bloques seguidos sin que la pelota toque la pala — el multiplicador sube y ganas más puntos por bloque</span></span>
+    </div>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">⭐</span>
+      <span><span class="howto-label">Bloque SPECIAL</span><span class="howto-desc">El bloque dorado da un puntaje extra grande</span></span>
+    </div>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">🏆</span>
+      <span><span class="howto-label">Atrapa el TROFEO</span><span class="howto-desc">Power-up que cae de algunos bloques: puntos x2 por varios segundos</span></span>
+    </div>
+    <h4 style="color:#22c55e">❤️ ¿CÓMO GANO VIDAS?</h4>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">💚</span>
+      <span><span class="howto-label">Atrapa el power-up +VIDA</span><span class="howto-desc">Cae al azar de algunos bloques (punto verde) — agárralo con la pala antes de que caiga al piso</span></span>
+    </div>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">🛡️</span>
+      <span><span class="howto-label">Usa el ESCUDO</span><span class="howto-desc">Mientras está activo, si se te cae la pelota NO pierdes vida</span></span>
+    </div>
+    <div class="howto-row howto-basic">
+      <span class="howto-icon">⚠️</span>
+      <span><span class="howto-label">Evita el punto rojo</span><span class="howto-desc">Ese power-up te puede quitar una vida (-VIDA) si lo agarras</span></span>
+    </div>
+    <div id="howto-good"></div>
+    <div id="howto-neutral"></div>
+    <div id="howto-bad"></div>
   </div>
 </div>
 
@@ -466,15 +555,22 @@ function scheduleLayout(){
 function measureAvailable(vw,vh,landscape){
   let reservedW=0,reservedH=0;
   const gap=Math.max(8,vw*0.015);
+  const bodyStyle=getComputedStyle(document.body);
+  const padL=parseFloat(bodyStyle.paddingLeft)||0;
+  const padR=parseFloat(bodyStyle.paddingRight)||0;
+  const padT=parseFloat(bodyStyle.paddingTop)||0;
+  const padB=parseFloat(bodyStyle.paddingBottom)||0;
   if(landscape){
     const hudW=hudEl?hudEl.getBoundingClientRect().width:0;
     const btnW=btnWrapEl?btnWrapEl.getBoundingClientRect().width:0;
-    reservedW=hudW+btnW+gap*2;
-    reservedH=gap*2;
+    const topBar=[logoTopEl,socialEl].filter(el=>el&&el.offsetParent!==null);
+    const topBarH=topBar.reduce((sum,el)=>sum+el.getBoundingClientRect().height,0)+topBar.length*4;
+    reservedW=hudW+btnW+gap*2+padL+padR;
+    reservedH=gap*2+padT+padB+topBarH;
   }else{
     const chrome=[logoTopEl,socialEl,hudEl,msg,btnWrapEl,ctrlEl].filter(el=>el&&el.offsetParent!==null);
-    reservedH=chrome.reduce((sum,el)=>sum+el.getBoundingClientRect().height,0)+chrome.length*8+gap*2;
-    reservedW=gap*2;
+    reservedH=chrome.reduce((sum,el)=>sum+el.getBoundingClientRect().height,0)+chrome.length*8+gap*2+padT+padB;
+    reservedW=gap*2+padL+padR;
   }
   return {availW:Math.max(220,vw-reservedW),availH:Math.max(160,vh-reservedH)};
 }
@@ -520,6 +616,7 @@ const COLS=9,BRK_ROWS=5;
 let BRK_H=38;
 let BRK_W=Math.floor((W-40)/COLS)-4;
 let PAD_W=156,PAD_H=12,PAD_Y=H-32;
+let BRICK_START_Y=50;
 
 // ── Recalcula la cuadrícula lógica del tablero según orientación real ──
 // Se llama SOLO en momentos seguros (inicio de partida, reinicio, subida
@@ -558,6 +655,9 @@ function computeBoardDims(){
   BRK_W=Math.floor((W-40)/COLS)-4;
   PAD_W=Math.round(156*(W/640));
   PAD_Y=H-32;
+  BRICK_START_Y=Math.round(50*(H/520));
+  LIDER_BANNER_Y=Math.round(3*(H/520));
+  LIDER_BANNER_H=Math.round(38*(H/520));
   fitCanvasBackingStore();
   applyResponsiveLayout();
 }
@@ -720,7 +820,7 @@ function initBricks(){
       const isArmored=!isSpecial&&!isExplosive&&Math.random()<armorChance;
       const hitMax=isSpecial?1:isExplosive?1:isArmored?(level>2?3:2):1;
       bricks.push({
-        x:20+c*(BRK_W+4),y:50+r*(BRK_H+5),
+        x:20+c*(BRK_W+4),y:BRICK_START_Y+r*(BRK_H+5),
         w:BRK_W,h:BRK_H,
         alive:true,
         color:isSpecial?'#ffd600':isExplosive?'#ff6600':p.color,
@@ -964,6 +1064,20 @@ function drawBG(){
   for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 }
 
+// Dibuja el logo del partido aprovechando TODO el rectángulo del bloque
+// (no solo un cuadrado chico centrado) sin deformar la imagen — igual que
+// "object-fit: contain". En bloques anchos (landscape) el logo crece a lo
+// ancho en vez de quedarse perdido en un cuadradito en medio del espacio.
+function drawFitImage(img,bx,by,bw,bh,padX,padTop,padBottom){
+  padBottom=padBottom===undefined?padTop:padBottom;
+  const availW=bw-padX*2,availH=bh-padTop-padBottom;
+  const iw=img.naturalWidth||1,ih=img.naturalHeight||1;
+  const scale=Math.min(availW/iw,availH/ih);
+  const dw=iw*scale,dh=ih*scale;
+  const dx=bx+(bw-dw)/2,dy=by+padTop+(availH-dh)/2;
+  ctx.drawImage(img,dx,dy,dw,dh);
+}
+
 function drawBricks(){
   bricks.forEach(b=>{
     if(!b.alive)return;
@@ -997,8 +1111,7 @@ function drawBricks(){
       ctx.strokeStyle=col;ctx.lineWidth=2.5;
       ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.stroke();
       if(b.img&&b.img.complete&&b.img.naturalWidth>0){
-        const size=b.h-10;
-        ctx.drawImage(b.img,b.x+(b.w-size)/2,b.y+2,size,size);
+        drawFitImage(b.img,b.x,b.y,b.w,b.h,9,7,18);
       }
       // hits-remaining number badge, bottom-center
       ctx.fillStyle=col;
@@ -1013,8 +1126,8 @@ function drawBricks(){
       ctx.strokeStyle=b.color;ctx.lineWidth=1.5;
       ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.stroke();
       if(b.img&&b.img.complete&&b.img.naturalWidth>0){
-        const size=b.h-6;
-        ctx.drawImage(b.img,b.x+(b.w-size)/2,b.y+3,size,size);
+        const bottomPad=b.hits>1?16:3;
+        drawFitImage(b.img,b.x,b.y,b.w,b.h,8,6,bottomPad);
       }
       if(b.dropType){
         const dotColor=b.dropGood===true?'#22c55e':b.dropGood===false?'#ef4444':'#ffd600';
@@ -1544,7 +1657,7 @@ function idleLiderLoop(){
 requestAnimationFrame(idleLiderLoop);
 
 // Banner NEÓN premium — letrero de bar elegante, tubo real con flicker y reflejo
-const LIDER_BANNER_Y=3, LIDER_BANNER_H=38;
+let LIDER_BANNER_Y=3, LIDER_BANNER_H=38;
 let neonFlickerSeed=Math.random()*1000;
 function drawLiderBanner(){
   if(!liderText)return;
@@ -1685,6 +1798,48 @@ document.getElementById('lb-modal').addEventListener('click',e=>{
     document.getElementById('lb-modal').classList.remove('show');
 });
 
+// ── Modal "¿Cómo se juega?": se llena dinámicamente desde DROP_TYPES,
+// así siempre queda sincronizado con los power-ups reales del juego.
+const DROP_DESCRIPTIONS={
+  life:'Te regala una vida extra',
+  shield:'Escudo: la pelota no se pierde si toca el piso',
+  wide:'Agranda tu pala por un rato (MEGA)',
+  trophy:'Puntos x2 durante varios segundos',
+  triple:'Divide tu pelota en 3 — combos rápidos',
+  neon:'Lluvia de power-ups aleatorios de golpe',
+  lostlife:'¡Cuidado! Pierdes una vida',
+  mini:'Caos: la pelota se vuelve errática/explosiva',
+  shrink:'Achica tu pala por un rato (TABLITA)',
+};
+function buildHowtoSection(containerId,title,color,filterFn){
+  const items=DROP_TYPES.filter(filterFn);
+  if(!items.length)return;
+  const rows=items.map(d=>`
+    <div class="howto-row" style="border-left:3px solid ${d.color}">
+      <span class="howto-icon">${d.icon}</span>
+      <span><span class="howto-label" style="color:${d.color}">${d.label}</span>
+      <span class="howto-desc">${DROP_DESCRIPTIONS[d.id]||''}</span></span>
+    </div>`).join('');
+  document.getElementById(containerId).innerHTML=
+    `<h4 style="color:${color}">${title}</h4>${rows}`;
+}
+function buildHowtoModal(){
+  buildHowtoSection('howto-good','✅ Power-ups BUENOS','#22c55e',d=>d.good===true);
+  buildHowtoSection('howto-neutral','⚡ Power-ups MIXTOS','#ffd600',d=>d.good===null);
+  buildHowtoSection('howto-bad','⚠️ TRAMPAS — ¡cuidado!','#ef4444',d=>d.good===false);
+}
+buildHowtoModal();
+document.getElementById('helpBtn').addEventListener('click',()=>{
+  document.getElementById('howto-modal').classList.add('show');
+});
+document.getElementById('howto-close').addEventListener('click',()=>{
+  document.getElementById('howto-modal').classList.remove('show');
+});
+document.getElementById('howto-modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('howto-modal'))
+    document.getElementById('howto-modal').classList.remove('show');
+});
+
 function loop(t){
   const dt=Math.min(t-lastT,50);lastT=t;
   update(dt);
@@ -1729,13 +1884,17 @@ function touchToPaddleX(clientX){
   const vw=window.visualViewport?window.visualViewport.width:window.innerWidth;
   return (clientX/vw)*W-paddle.w/2;
 }
+function anyModalOpen(){
+  return document.getElementById('lb-modal').classList.contains('show')
+      || document.getElementById('howto-modal').classList.contains('show');
+}
 document.addEventListener('touchstart',e=>{
-  if(state!=='playing')return;
+  if(state!=='playing'||anyModalOpen())return;
   touchX=e.touches[0].clientX;
   paddle.x=clampPaddle(touchToPaddleX(touchX));
 },{passive:true});
 document.addEventListener('touchmove',e=>{
-  if(state!=='playing')return;
+  if(state!=='playing'||anyModalOpen())return;
   touchX=e.touches[0].clientX;
   paddle.x=clampPaddle(touchToPaddleX(touchX));
   e.preventDefault();
