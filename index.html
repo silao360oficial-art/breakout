@@ -13,10 +13,14 @@ body{
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   padding:clamp(4px,1.6vh,10px) clamp(4px,2vw,10px);
   min-height:100vh;min-height:100dvh;
-  overflow:hidden;
+  overflow-y:auto;
   overscroll-behavior:none;
-  touch-action:none;
+  touch-action:pan-y;
 }
+/* Mientras se está jugando, el dedo controla la pala en cualquier parte
+   de la pantalla (ver touchmove/preventDefault en JS) — ahí sí bloqueamos
+   el paneo nativo para que no compita con el control de la pala. */
+body.is-playing{touch-action:none;overflow:hidden;}
 
 /* ── GAME CORE WRAPPER (hud + board + msg + controles) ── */
 #game-core{display:flex;flex-direction:column;align-items:center;width:100%;}
@@ -1647,6 +1651,7 @@ setInterval(loadLiderBar,30000);
 // en cualquier momento en que el loop principal del juego no esté corriendo
 // (pantalla de inicio, pausa, game over), para que nunca "desaparezca".
 function idleLiderLoop(){
+  document.body.classList.toggle('is-playing',state==='playing');
   if(state!=='playing'){
     drawBG();
     drawLiderBanner();
@@ -1763,13 +1768,22 @@ function drawLiderBanner(){
   ctx.shadowBlur=0;
   ctx.globalAlpha=1;
 
-  // Reflejo tenue debajo del texto (como vidrio de bar pulido)
+  // Reflejo tenue debajo del texto (como vidrio de bar pulido).
+  // Se recorta (clip) a una franja angosta justo debajo del banner para
+  // que NUNCA se superponga/duplique sobre el texto principal ni sobre
+  // los ladrillos — antes el cálculo de la transformación lo dejaba casi
+  // encima del texto original ("fuera de lugar").
+  const reflGap=2, reflBandH=Math.max(6,Math.round(bh*0.32));
+  const reflCenterY=by+bh+reflGap+reflBandH/2;
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(bx,by+bh+reflGap,bw,reflBandH);
+  ctx.clip();
+  ctx.translate(0,reflCenterY);
   ctx.scale(1,-1);
-  ctx.translate(0,-(2*cy+10));
-  ctx.globalAlpha=0.12*flicker;
+  ctx.globalAlpha=0.16*flicker;
   ctx.fillStyle='#ff66cc';
-  ctx.fillText(fullText,tx,cy);
+  ctx.fillText(fullText,tx,0);
   ctx.restore();
   ctx.globalAlpha=1;
 
